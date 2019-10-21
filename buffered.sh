@@ -31,5 +31,3 @@ done
 # remove temporary trace and log file
 rm -f tracefile.log
 rm -f temporary.log
-
-
