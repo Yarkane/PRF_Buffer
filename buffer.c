@@ -2,8 +2,6 @@
  * Buffer with finite size and exponential arrivals
  */
 
-//test
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,11 +23,26 @@ fifo_buffer_t *buffer;
 FILE *tracefile;
 double lambda, mu, k;
 
+double nLost = 0;
+event_t *nextEvent;
+
 /* process arrival */
 void callback_arrival() {
+	packet_t *pkt;
+	pkt = packet_new();
 
-	/* to be completed */
-
+	//Place disponible ??
+	if(k > buffer->size){
+		fifo_buffer_in(buffer, pkt);
+		//si c'est le premier paquet du buffer : schedule le departure
+		if(buffer->size == 1) {
+			schedule(DEPARTURE, now+exponential(mu, &seed_mu));
+		}
+	}else{
+		nLost++;
+	}
+	//On schedule la prochaine arrivée
+	schedule(ARRIVAL,now+exponential(lambda, &seed_lambda));
 }
 
 /* process departure */
@@ -78,6 +91,8 @@ int main(int argc, const char* argv[]) {
 	mu = atof(argv[4]);
 	k = atoi(argv[5]);
 
+	double nPackets = stop*lambda;
+
 	/* open output trace file */
 	tracefile = fopen(tracefilename, "w");
 	if(tracefile == NULL) {
@@ -100,9 +115,15 @@ int main(int argc, const char* argv[]) {
 		fifo_buffer_dump(buffer);
 #endif //======================================================================
 
-		/* to be completed */
+		nextEvent = fes_get();
+		now = nextEvent->time;
+		if(nextEvent->type == ARRIVAL) callback_arrival();
+		else if (nextEvent->type == DEPARTURE) callback_departure();
+		else printf("wtf ?\n");
 
 	}
 
+	printf("Packets loss = %f\n",nLost);
+	printf("All packets = %f\n",nPackets);
 	return(0);
 }
