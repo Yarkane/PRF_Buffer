@@ -38,8 +38,12 @@ void callback_arrival() {
 		if(buffer->size == 1) {
 			schedule(DEPARTURE, now+exponential(mu, &seed_mu));
 		}
+		/* tracing */
+		fprintf(tracefile, "at %.6f pkt %d arrival\n", now, pkt->uid);
 	}else{
 		nLost++;
+		/* tracing */
+		fprintf(tracefile, "at %.6f pkt %d lost\n", now, pkt->uid);
 	}
 	//On schedule la prochaine arrivée
 	schedule(ARRIVAL,now+exponential(lambda, &seed_lambda));
@@ -120,6 +124,7 @@ int main(int argc, const char* argv[]) {
 		if(nextEvent->type == ARRIVAL) callback_arrival();
 		else if (nextEvent->type == DEPARTURE) callback_departure();
 		else printf("wtf ?\n");
+
 
 	}
 

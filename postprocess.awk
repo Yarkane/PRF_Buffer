@@ -1,6 +1,7 @@
 BEGIN {
 	time = 0;
 	buffered = 0;
+	nlost = 0;
 }
 
 {
@@ -17,11 +18,15 @@ BEGIN {
 		time = $2;
 		buffered--;
 	}
+	else if($5 == "lost") {
+		delta_t = $2-time;
+		buffered_avg += buffered*delta_t;
+		time = $2;
+		nlost++;
+	}
 }
 
 END {
 	# output the average number of buffered packets
-	printf("%12s %10.4f\n\n", "buffered", buffered_avg/time);
+	printf("%12s %10.4f\n%12s %10i\n", "buffered", buffered_avg/time,"lost",nlost);
 }
-
-
