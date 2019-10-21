@@ -2,6 +2,7 @@ BEGIN {
 	time = 0;
 	buffered = 0;
 	nlost = 0;
+	nPackets = 0;
 }
 
 {
@@ -11,6 +12,7 @@ BEGIN {
 		buffered_avg += buffered*delta_t;
 		time = $2;
 		buffered++;
+		nPackets++;
 	}
 	else if($5 == "departure") {
 		delta_t = $2-time;
@@ -23,10 +25,11 @@ BEGIN {
 		buffered_avg += buffered*delta_t;
 		time = $2;
 		nlost++;
+		nPackets++;
 	}
 }
 
 END {
 	# output the average number of buffered packets
-	printf("%12s %10.4f\n%12s %10i\n", "buffered", buffered_avg/time,"lost",nlost);
+	printf("%12s %10.4f\n%12s %10.9f\n", "buffered", buffered_avg/time,"loss",nlost/nPackets);
 }
